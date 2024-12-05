@@ -11,6 +11,7 @@ import com.garmin.fit.*;
 
 import java.util.TimeZone;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class EncodeActivity {
 
@@ -83,7 +84,7 @@ public class EncodeActivity {
         int previousHr = random.nextInt(maxHr - minimalHr + 1) + minimalHr;
 
         // Create half an  hour (3600 seconds) of Record data
-        for (int i = 0; i <= 5600; i++) {
+        for (int i = 0; i <= getDuration(); i++) {
             // Create a new Record message and set the timestamp
             RecordMesg recordMesg = new RecordMesg();
             recordMesg.setTimestamp(timestamp);
@@ -155,12 +156,21 @@ public class EncodeActivity {
         createActivityFile(messages, filename, startTime);
     }
 
+    private static int getDuration() {
+        // Define the range in seconds
+        int minSeconds = 90 * 60; // 1.5 hours in seconds
+        int maxSeconds = 150 * 60; // 2.5 hours in seconds
+
+        // Generate a random number in the range [minSeconds, maxSeconds]
+        return ThreadLocalRandom.current().nextInt(minSeconds, maxSeconds + 1);
+    }
+
 
     public static void createActivityFile(List<Mesg> messages, String filename, DateTime startTime) {
         // The combination of file type, manufacturer id, product id, and serial number should be unique.
         // When available, a non-random serial number should be used.
         File fileType = File.ACTIVITY;
-        short manufacturerId = Manufacturer.DEVELOPMENT;
+        short manufacturerId = Manufacturer.POLAR_ELECTRO;
         short productId = 0;
         float softwareVersion = 1.0f;
 
@@ -178,9 +188,9 @@ public class EncodeActivity {
         // A Device Info message is a BEST PRACTICE for FIT ACTIVITY files
         DeviceInfoMesg deviceInfoMesg = new DeviceInfoMesg();
         deviceInfoMesg.setDeviceIndex(DeviceIndex.CREATOR);
-        deviceInfoMesg.setManufacturer(Manufacturer.DEVELOPMENT);
+        deviceInfoMesg.setManufacturer(Manufacturer.POLAR_ELECTRO);
         deviceInfoMesg.setProduct((int) productId);
-        deviceInfoMesg.setProductName("FIT Cookbook"); // Max 20 Chars
+        deviceInfoMesg.setProductName("H7 Smart Black"); // Max 20 Chars
         deviceInfoMesg.setSerialNumber((long) serialNumber);
         deviceInfoMesg.setSoftwareVersion(softwareVersion);
         deviceInfoMesg.setTimestamp(startTime);
